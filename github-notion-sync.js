@@ -1,19 +1,19 @@
-require('dotenv').config();
-const { Client } = require('@notionhq/client');
-const { execSync } = require('child_process');
+import { Client } from '@notionhq/client';
+import 'dotenv/config';
+import sendMail from './mailer.js'; // ✅ ES6 import if you're using `.mjs`
 
 const notion = new Client({ auth: process.env.NOTION_TOKEN });
 
 async function main() {
-  const commitMessage = execSync('git log -1 --pretty=%B').toString().trim();
-  const cleanTitle = commitMessage.replace(/^AgroConnect:\s*/, '');
+  const commitMessage = process.argv[2] || '';
+  const cleanTitle = commitMessage.trim();
 
   const res = await notion.databases.query({
-    database_id: process.env.NOTION_DATABASE_ID,
+    database_id: process.env.AGRO_DB_ID,
     filter: {
       property: 'Task',
-      rich_text: {
-        contains: cleanTitle
+      title: {
+        equals: cleanTitle
       }
     }
   });
@@ -36,6 +36,12 @@ async function main() {
   });
 
   console.log(`✅ Updated task "${cleanTitle}" to ✅`);
+
+  // ✅ Email alert after successful update
+  await sendMail(
+    "✅ AgroConnect GitHub Task Synced",
+    `The task "${cleanTitle}" was marked complete via GitHub commit. Great job!`
+  );
 }
 
 main().catch(err => console.error('❌ Error:', err));
