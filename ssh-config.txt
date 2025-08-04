@@ -1,0 +1,14 @@
+# Hostgator SSH Configuration
+# Generated on Thu Jul 31 20:53:34 EDT 2025
+
+SSH_HOST=50.6.160.170
+SSH_USER=nyxezvte
+SSH_PORT=2222
+REMOTE_PATH=/home/nyxezvte/public_html
+BACKUP_PATH=/home/nyxezvte/backups
+
+# Optional: SSH Key path (if using key-based authentication)
+# SSH_KEY_PATH=~/.ssh/id_rsa
+
+# Optional: Additional SSH options
+# SSH_OPTIONS="-o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null"
