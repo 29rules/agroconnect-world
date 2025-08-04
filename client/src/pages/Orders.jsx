@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { 
-  ShoppingCart, Search, Filter, Download, 
+  ShoppingCart, Search, Download, 
   Eye, Edit, Trash2, Plus, Package, 
   Clock, CheckCircle, XCircle, AlertCircle 
 } from 'lucide-react';
@@ -10,7 +10,7 @@ import axios from 'axios';
 import analyticsService from '../services/analyticsService';
 
 const Orders = () => {
-  const { t } = useTranslation();
+  const { i18n } = useTranslation();
   const [orders, setOrders] = useState([]);
   const [filteredOrders, setFilteredOrders] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -34,7 +34,7 @@ const Orders = () => {
   const fetchOrders = async () => {
     try {
       setLoading(true);
-      const response = await axios.get('http://localhost:8080/api/orders/');
+      const response = await axios.get(`${process.env.REACT_APP_API_URL || 'http://localhost:8080'}/api/orders/`);
       setOrders(response.data);
       analyticsService.trackEvent('orders_loaded', { count: response.data.length });
     } catch (error) {
@@ -58,7 +58,7 @@ const Orders = () => {
       orderDate: '2024-08-02T10:30:00Z',
       expectedDeliveryDate: '2024-08-15T00:00:00Z',
       items: [
-        { productName: 'Premium Sesame Seeds', quantity: 100, unitPrice: 2.50 }
+        { productName: 'Black Sesame Seeds', quantity: 100, unitPrice: 3.50 }
       ]
     },
     {
@@ -72,7 +72,7 @@ const Orders = () => {
       orderDate: '2024-08-01T14:20:00Z',
       expectedDeliveryDate: '2024-08-12T00:00:00Z',
       items: [
-        { productName: 'Natural Fertilizer Mix', quantity: 40, unitPrice: 45.00 }
+        { productName: 'White Sesame Seeds', quantity: 50, unitPrice: 2.80 }
       ]
     },
     {
@@ -86,8 +86,8 @@ const Orders = () => {
       orderDate: '2024-07-30T09:15:00Z',
       expectedDeliveryDate: '2024-08-10T00:00:00Z',
       items: [
-        { productName: 'Smart Irrigation System', quantity: 2, unitPrice: 1200.00 },
-        { productName: 'Premium Sesame Seeds', quantity: 200, unitPrice: 2.50 }
+        { productName: 'Premium Organic Sesame Mix', quantity: 200, unitPrice: 4.20 },
+        { productName: 'Black Sesame Seeds', quantity: 150, unitPrice: 3.50 }
       ]
     }
   ];

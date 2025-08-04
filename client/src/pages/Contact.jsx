@@ -8,7 +8,7 @@ import { useTranslation } from 'react-i18next';
 import analyticsService from '../services/analyticsService';
 
 const Contact = () => {
-  const { t } = useTranslation();
+  const { i18n } = useTranslation();
   const [formData, setFormData] = useState({
     firstName: '',
     lastName: '',
@@ -17,8 +17,8 @@ const Contact = () => {
     subject: '',
     message: '',
     company: '',
-    farmType: '',
-    farmSize: '',
+    orderType: '',
+    orderSize: '',
     location: '',
     preferredContactMethod: 'email',
     newsletterSubscription: false
@@ -47,7 +47,7 @@ const Contact = () => {
       // Track form submission
       analyticsService.trackFormSubmission('contact_form', formData);
 
-      const response = await fetch('http://localhost:8080/api/contact', {
+      const response = await fetch(`${process.env.REACT_APP_API_URL || 'http://localhost:8080'}/api/contact`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -65,8 +65,8 @@ const Contact = () => {
           subject: '',
           message: '',
           company: '',
-          farmType: '',
-          farmSize: '',
+          orderType: '',
+          orderSize: '',
           location: '',
           preferredContactMethod: 'email',
           newsletterSubscription: false
@@ -190,33 +190,29 @@ const Contact = () => {
                 />
               </div>
               <div className="form-group">
-                <label htmlFor="farmType">Farm Type</label>
+                <label htmlFor="orderType">Order Type</label>
                 <select 
-                  id="farmType" 
-                  name="farmType" 
-                  value={formData.farmType}
+                  id="orderType" 
+                  name="orderType" 
+                  value={formData.orderType}
                   onChange={handleInputChange}
                 >
-                  <option value="">Select farm type</option>
-                  <option value="crop">Crop Farming</option>
-                  <option value="livestock">Livestock</option>
-                  <option value="dairy">Dairy</option>
-                  <option value="poultry">Poultry</option>
-                  <option value="mixed">Mixed Farming</option>
-                  <option value="other">Other</option>
+                  <option value="">Select order type</option>
+                  <option value="sesame">Sesame Seeds</option>
+                  <option value="other">Other Products</option>
                 </select>
               </div>
             </div>
 
             <div className="form-row">
               <div className="form-group">
-                <label htmlFor="farmSize">Farm Size (acres)</label>
+                <label htmlFor="orderSize">Order Size (kg)</label>
                 <input 
                   type="number" 
-                  id="farmSize" 
-                  name="farmSize" 
+                  id="orderSize" 
+                  name="orderSize" 
                   min="0" 
-                  value={formData.farmSize}
+                  value={formData.orderSize}
                   onChange={handleInputChange}
                 />
               </div>

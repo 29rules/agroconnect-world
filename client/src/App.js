@@ -58,7 +58,7 @@ function App() {
       });
 
       // Send message to backend
-      const response = await fetch('http://localhost:8080/api/chat/simple', {
+      const response = await fetch(`${process.env.REACT_APP_API_URL || 'http://localhost:8080'}/api/chat/simple`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -108,7 +108,7 @@ function App() {
       // Track form submission
       analyticsService.trackFormSubmission('contact_form', contactData);
 
-      const response = await fetch('http://localhost:8080/api/contact', {
+      const response = await fetch(`${process.env.REACT_APP_API_URL || 'http://localhost:8080'}/api/contact`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

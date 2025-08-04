@@ -9,7 +9,7 @@ import { useTranslation } from 'react-i18next';
 import analyticsService from '../services/analyticsService';
 
 const Dashboard = () => {
-  const { t } = useTranslation();
+  const { i18n } = useTranslation();
   const [analytics, setAnalytics] = useState({
     pageViews: 0,
     uniqueVisitors: 0,
@@ -62,7 +62,7 @@ const Dashboard = () => {
       change: '+8.3%'
     },
     {
-      title: 'Orders',
+      title: 'Sesame Orders',
       value: analytics.orders.toLocaleString(),
       icon: <ShoppingCart />,
       color: 'purple',
@@ -76,7 +76,7 @@ const Dashboard = () => {
       change: '+22.1%'
     },
     {
-      title: 'Products',
+      title: 'Sesame Products',
       value: analytics.products.toLocaleString(),
       icon: <Package />,
       color: 'red',

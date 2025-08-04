@@ -1,15 +1,15 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { 
-  Search, Filter, ShoppingCart, Eye, Download, 
-  Star, CheckCircle, Package, Globe, TrendingUp 
+  Search, ShoppingCart, Eye, Download, 
+  CheckCircle, Package, Globe, Leaf, TestTube 
 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import axios from 'axios';
 import analyticsService from '../services/analyticsService';
 
 const Products = () => {
-  const { t } = useTranslation();
+  const { i18n } = useTranslation();
   const [products, setProducts] = useState([]);
   const [filteredProducts, setFilteredProducts] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -19,7 +19,7 @@ const Products = () => {
   const [showOrganicOnly, setShowOrganicOnly] = useState(false);
 
   const categories = [
-    'all', 'seeds', 'fertilizers', 'pesticides', 'equipment', 'tools', 'machinery'
+    'all', 'black-sesame', 'white-sesame', 'organic', 'premium', 'bulk'
   ];
 
   useEffect(() => {
@@ -34,7 +34,7 @@ const Products = () => {
   const fetchProducts = async () => {
     try {
       setLoading(true);
-      const response = await axios.get('http://localhost:8080/api/products/');
+      const response = await axios.get(`${process.env.REACT_APP_API_URL || 'http://localhost:8080'}/api/products/`);
       setProducts(response.data);
       analyticsService.trackEvent('products_loaded', { count: response.data.length });
     } catch (error) {
@@ -49,54 +49,57 @@ const Products = () => {
   const getSampleProducts = () => [
     {
       id: '1',
-      name: 'Premium Sesame Seeds',
-      description: 'High-quality organic sesame seeds from Ethiopia',
-      category: 'seeds',
-      price: 2.50,
+      name: 'Black Sesame Seeds',
+      description: 'Premium black sesame seeds with strong aroma, perfect for cuisine and oil extraction',
+      category: 'black-sesame',
+      price: 3.50,
       currency: 'USD',
       unit: 'kg',
       stockQuantity: 1000,
       imageUrl: 'https://images.unsplash.com/photo-1574323347407-f5e1ad6d020b?w=400',
-      tags: ['organic', 'premium', 'export'],
+      tags: ['organic', 'premium', 'black', 'export'],
       supplier: 'Ethiopian Farmers Co-op',
       origin: 'Ethiopia',
       qualityGrade: 'A',
       isOrganic: true,
-      isAvailable: true
+      isAvailable: true,
+      packaging: ['100g', '250g', '500g', '1kg']
     },
     {
       id: '2',
-      name: 'Natural Fertilizer Mix',
-      description: 'Organic fertilizer blend for sustainable farming',
-      category: 'fertilizers',
-      price: 45.00,
+      name: 'White Sesame Seeds',
+      description: 'Mild-tasting white sesame seeds ideal for baking and salad usage',
+      category: 'white-sesame',
+      price: 2.80,
       currency: 'USD',
-      unit: 'bag',
-      stockQuantity: 500,
+      unit: 'kg',
+      stockQuantity: 1500,
       imageUrl: 'https://images.unsplash.com/photo-1581578731548-c64695cc6952?w=400',
-      tags: ['organic', 'natural', 'sustainable'],
-      supplier: 'Green Earth Solutions',
-      origin: 'USA',
+      tags: ['organic', 'mild', 'white', 'baking'],
+      supplier: 'Indian Sesame Co-op',
+      origin: 'India',
       qualityGrade: 'A',
       isOrganic: true,
-      isAvailable: true
+      isAvailable: true,
+      packaging: ['100g', '250g', '500g', '1kg']
     },
     {
       id: '3',
-      name: 'Smart Irrigation System',
-      description: 'Automated irrigation system with IoT sensors',
-      category: 'equipment',
-      price: 1200.00,
+      name: 'Premium Organic Sesame Mix',
+      description: 'Premium blend of black and white sesame seeds for gourmet applications',
+      category: 'premium',
+      price: 4.20,
       currency: 'USD',
-      unit: 'system',
-      stockQuantity: 50,
+      unit: 'kg',
+      stockQuantity: 800,
       imageUrl: 'https://images.unsplash.com/photo-1565299624946-b28f40a0ca4b?w=400',
-      tags: ['smart', 'automated', 'IoT'],
-      supplier: 'AgriTech Solutions',
-      origin: 'Netherlands',
-      qualityGrade: 'A',
-      isOrganic: false,
-      isAvailable: true
+      tags: ['organic', 'premium', 'blend', 'gourmet'],
+      supplier: 'AgroConnect Premium',
+      origin: 'Mixed',
+      qualityGrade: 'A+',
+      isOrganic: true,
+      isAvailable: true,
+      packaging: ['250g', '500g', '1kg', '5kg']
     }
   ];
 

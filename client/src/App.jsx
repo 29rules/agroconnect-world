@@ -11,7 +11,7 @@ import Footer from './components/Footer';
 import './App.css';
 
 function App() {
-  const { t } = useTranslation();
+  const { i18n } = useTranslation();
 
   return (
     <Router>
@@ -23,7 +23,7 @@ function App() {
             <Route path="/products" element={<Products />} />
             <Route path="/orders" element={<Orders />} />
             <Route path="/contact" element={<Contact />} />
-            <Route path="/admin" element={<Dashboard />} />
+            <Route path="/dashboard" element={<Dashboard />} />
           </Routes>
         </main>
         <Footer />

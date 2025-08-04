@@ -9,16 +9,21 @@ spring:
       uri: ${MONGODB_URI:mongodb://localhost:27017/agroconnect}
       database: agroconnect
 
+logging:
+  file:
+    name: logs/operate.log
+  level:
+    com.agroconnect.order: INFO
+    org.springframework.data.mongodb: INFO
+  pattern:
+    file: "%d{yyyy-MM-dd HH:mm:ss} | %-5level | %logger{36} | %msg%n"
+    console: "%d{yyyy-MM-dd HH:mm:ss} | %-5level | %logger{36} | %msg%n"
+
 management:
   endpoints:
     web:
       exposure:
-        include: health,info,metrics
+        include: health,info
   endpoint:
     health:
-      show-details: always
-
-logging:
-  level:
-    com.agroconnect.order: DEBUG
-    org.springframework.data.mongodb: DEBUG 
+      show-details: always 

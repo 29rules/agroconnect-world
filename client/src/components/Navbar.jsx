@@ -2,14 +2,14 @@ import React, { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
-  Menu, X, Globe, ChevronDown, User, Settings, 
-  BarChart3, ShoppingCart, Bell 
+  Menu, X, Globe, ChevronDown, User, 
+  BarChart3, ShoppingCart, Bell, Leaf, Package 
 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import analyticsService from '../services/analyticsService';
 
 const Navbar = () => {
-  const { t, i18n } = useTranslation();
+  const { i18n } = useTranslation();
   const location = useLocation();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isLanguageOpen, setIsLanguageOpen] = useState(false);
@@ -17,7 +17,7 @@ const Navbar = () => {
   const languages = [
     { code: 'en', name: 'English', flag: '🇺🇸' },
     { code: 'fr', name: 'Français', flag: '🇫🇷' },
-    { code: 'es', name: 'Español', flag: '🇪🇸' }
+    { code: 'hi', name: 'हिंदी', flag: '🇮🇳' }
   ];
 
   const toggleMenu = () => {
@@ -49,7 +49,7 @@ const Navbar = () => {
           transition={{ duration: 0.5 }}
         >
           <Link to="/">
-            <Globe className="logo-icon" />
+            <Leaf className="logo-icon" />
             <span>AgroConnect World</span>
           </Link>
         </motion.div>
@@ -84,11 +84,11 @@ const Navbar = () => {
             Contact
           </Link>
           <Link 
-            to="/admin" 
-            className="admin-btn"
-            onClick={() => analyticsService.trackLinkClick('/admin', 'Admin')}
+            to="/bulk" 
+            className="bulk-btn"
+            onClick={() => analyticsService.trackLinkClick('/bulk', 'Bulk Orders')}
           >
-            <BarChart3 /> Analytics
+            <Package /> Bulk Orders
           </Link>
         </div>
 
@@ -162,8 +162,8 @@ const Navbar = () => {
             <Link to="/products" onClick={() => setIsMenuOpen(false)}>Products</Link>
             <Link to="/orders" onClick={() => setIsMenuOpen(false)}>Orders</Link>
             <Link to="/contact" onClick={() => setIsMenuOpen(false)}>Contact</Link>
-            <Link to="/admin" onClick={() => setIsMenuOpen(false)}>
-              <BarChart3 /> Analytics
+            <Link to="/bulk" onClick={() => setIsMenuOpen(false)}>
+              <Package /> Bulk Orders
             </Link>
             
             {/* Mobile Language Switcher */}

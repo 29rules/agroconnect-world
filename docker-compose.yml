@@ -26,16 +26,22 @@ services:
     environment:
       SPRING_PROFILES_ACTIVE: docker
       MONGODB_URI: mongodb://admin:agroconnect123@mongodb:27017/agroconnect?authSource=admin
-      PRODUCT_SERVICE_URL: http://product-service:8081
-      ORDER_SERVICE_URL: http://order-service:8082
-      USER_SERVICE_URL: http://user-service:8083
-      AUDIT_SERVICE_URL: http://audit-log-service:8084
+      PRODUCT_SERVICE_URL: http://agroconnect-product-service:8081
+      ORDER_SERVICE_URL: http://agroconnect-order-service:8082
+      USER_SERVICE_URL: http://agroconnect-user-service:8083
+      AUDIT_SERVICE_URL: http://agroconnect-audit-service:8084
     depends_on:
       - mongodb
       - product-service
       - order-service
       - user-service
       - audit-log-service
+    restart: always
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/actuator/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
     networks:
       - agroconnect-network
 
@@ -106,7 +112,7 @@ services:
     ports:
       - '3000:3000'
     environment:
-      REACT_APP_API_URL: http://localhost:8080
+      REACT_APP_API_URL: http://api-gateway:8080
       REACT_APP_CRISP_WEBSITE_ID: your-crisp-website-id
     depends_on:
       - api-gateway
