@@ -1,0 +1,17 @@
+AgroConnect World Frontend Deployment
+====================================
+Deployment Date: Thu Jul 31 20:54:22 EDT 2025
+Build Version: 723c375
+Environment: Production
+Backend API: Supabase
+Deployment Method: SSH
+
+Deployment Instructions:
+1. Files deployed via SSH to Hostgator
+2. Ensure .htaccess is in the root directory
+3. Update API endpoints in src/services/ to point to Supabase
+4. Test the application
+
+Backup Instructions:
+- Backup created before deployment
+- Keep a copy of this deployment package

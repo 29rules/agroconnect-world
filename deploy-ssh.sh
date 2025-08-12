@@ -53,7 +53,11 @@ if [[ ! -f "$SSH_CONFIG_FILE" ]]; then
     cat << EOF
 SSH_HOST=your-domain.com
 SSH_USER=your-cpanel-username
+<<<<<<< HEAD
 SSH_PORT=2222
+=======
+SSH_PORT=22
+>>>>>>> b439a08fcfb8172475f96d4db49272cea973daa6
 REMOTE_PATH=/home/your-cpanel-username/public_html
 BACKUP_PATH=/home/your-cpanel-username/backups
 EOF
@@ -73,7 +77,11 @@ for var in "${required_vars[@]}"; do
 done
 
 # Set default values for optional variables
+<<<<<<< HEAD
 SSH_PORT="${SSH_PORT:-2222}"
+=======
+SSH_PORT="${SSH_PORT:-22}"
+>>>>>>> b439a08fcfb8172475f96d4db49272cea973daa6
 BACKUP_PATH="${BACKUP_PATH:-/home/$SSH_USER/backups}"
 
 print_success "SSH Configuration loaded: $SSH_USER@$SSH_HOST:$REMOTE_PATH"
