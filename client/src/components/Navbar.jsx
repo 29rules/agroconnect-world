@@ -1,192 +1,118 @@
 import React, { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { motion, AnimatePresence } from 'framer-motion';
-import { 
-  Menu, X, Globe, ChevronDown, User, 
-  BarChart3, ShoppingCart, Bell, Leaf, Package 
-} from 'lucide-react';
+import { Leaf, Menu, X, Globe, Heart } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
-import analyticsService from '../services/analyticsService';
+import SearchBar from './SearchBar';
+import { useWishlist } from './Wishlist';
 
 const Navbar = () => {
-  const { i18n } = useTranslation();
   const location = useLocation();
+  const { i18n } = useTranslation();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const [isLanguageOpen, setIsLanguageOpen] = useState(false);
+  const [currentLanguage, setCurrentLanguage] = useState('EN');
+  const { wishlistCount } = useWishlist();
+
+  const navLinks = [
+    { path: '/', label: 'Home' },
+    { path: '/products', label: 'Products' },
+    { path: '/orders', label: 'Orders' },
+    { path: '/contact', label: 'Contact' },
+    { path: '/bulk-orders', label: 'Bulk Orders' }
+  ];
 
   const languages = [
-    { code: 'en', name: 'English', flag: '🇺🇸' },
-    { code: 'fr', name: 'Français', flag: '🇫🇷' },
-    { code: 'hi', name: 'हिंदी', flag: '🇮🇳' }
+    { code: 'EN', name: 'English' },
+    { code: 'FR', name: 'Français' },
+    { code: 'HI', name: 'हिंदी' }
   ];
+
+  const handleLanguageChange = (langCode) => {
+    setCurrentLanguage(langCode);
+    i18n.changeLanguage(langCode.toLowerCase());
+  };
 
   const toggleMenu = () => {
     setIsMenuOpen(!isMenuOpen);
-    analyticsService.trackButtonClick('menu-toggle', 'navigation');
   };
 
-  const toggleLanguage = () => {
-    setIsLanguageOpen(!isLanguageOpen);
+  const closeMenu = () => {
+    setIsMenuOpen(false);
   };
 
-  const changeLanguage = (languageCode) => {
-    i18n.changeLanguage(languageCode);
-    setIsLanguageOpen(false);
-    analyticsService.trackEvent('language_changed', { language: languageCode });
-  };
-
-  const isActive = (path) => {
-    return location.pathname === path;
+  const handleNavigation = (path) => {
+    closeMenu();
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   return (
-    <nav className="navbar">
-      <div className="nav-container">
-        <motion.div 
-          className="nav-logo"
-          initial={{ opacity: 0, x: -20 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ duration: 0.5 }}
-        >
-          <Link to="/">
+    <header className="navbar-header">
+      <nav className="navbar">
+        {/* Logo */}
+        <div className="nav-logo">
+          <Link to="/" onClick={() => handleNavigation('/')}>
             <Leaf className="logo-icon" />
             <span>AgroConnect World</span>
           </Link>
-        </motion.div>
-
-        <div className="nav-menu">
-          <Link 
-            to="/" 
-            className={isActive('/') ? 'active' : ''}
-            onClick={() => analyticsService.trackLinkClick('/', 'Home')}
-          >
-            Home
-          </Link>
-          <Link 
-            to="/products" 
-            className={isActive('/products') ? 'active' : ''}
-            onClick={() => analyticsService.trackLinkClick('/products', 'Products')}
-          >
-            Products
-          </Link>
-          <Link 
-            to="/orders" 
-            className={isActive('/orders') ? 'active' : ''}
-            onClick={() => analyticsService.trackLinkClick('/orders', 'Orders')}
-          >
-            Orders
-          </Link>
-          <Link 
-            to="/contact" 
-            className={isActive('/contact') ? 'active' : ''}
-            onClick={() => analyticsService.trackLinkClick('/contact', 'Contact')}
-          >
-            Contact
-          </Link>
-          <Link 
-            to="/bulk" 
-            className="bulk-btn"
-            onClick={() => analyticsService.trackLinkClick('/bulk', 'Bulk Orders')}
-          >
-            <Package /> Bulk Orders
-          </Link>
         </div>
 
-        <div className="nav-actions">
-          {/* Language Switcher */}
-          <div className="language-switcher">
-            <button 
-              className="language-btn"
-              onClick={toggleLanguage}
-              onBlur={() => setTimeout(() => setIsLanguageOpen(false), 200)}
+        {/* Desktop Navigation Links */}
+        <div className={`nav-links ${isMenuOpen ? 'active' : ''}`}>
+          {navLinks.map((link) => (
+            <Link
+              key={link.path}
+              to={link.path}
+              className={`nav-link ${location.pathname === link.path ? 'active' : ''}`}
+              onClick={() => handleNavigation(link.path)}
             >
-              <Globe />
-              <span>{languages.find(lang => lang.code === i18n.language)?.flag || '🇺🇸'}</span>
-              <ChevronDown />
-            </button>
-            
-            <AnimatePresence>
-              {isLanguageOpen && (
-                <motion.div 
-                  className="language-dropdown"
-                  initial={{ opacity: 0, y: -10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -10 }}
-                  transition={{ duration: 0.2 }}
-                >
-                  {languages.map((language) => (
-                    <button
-                      key={language.code}
-                      className={`language-option ${i18n.language === language.code ? 'active' : ''}`}
-                      onClick={() => changeLanguage(language.code)}
-                    >
-                      <span className="flag">{language.flag}</span>
-                      <span className="name">{language.name}</span>
-                    </button>
-                  ))}
-                </motion.div>
-              )}
-            </AnimatePresence>
-          </div>
+              {link.label}
+            </Link>
+          ))}
+        </div>
 
-          {/* User Actions */}
-          <div className="user-actions">
-            <button className="action-btn">
-              <Bell />
-            </button>
-            <button className="action-btn">
-              <ShoppingCart />
-            </button>
-            <button className="action-btn">
-              <User />
-            </button>
-          </div>
+        {/* Search Bar */}
+        <div className="nav-search">
+          <SearchBar />
+        </div>
 
-          <button className="nav-toggle" onClick={toggleMenu}>
-            {isMenuOpen ? <X /> : <Menu />}
+        {/* Wishlist Toggle */}
+        <div className="nav-wishlist">
+          <button className="wishlist-toggle">
+            <Heart size={20} />
+            <span>Wishlist</span>
+            {wishlistCount > 0 && (
+              <span className="wishlist-count">{wishlistCount}</span>
+            )}
           </button>
         </div>
-      </div>
 
-      {/* Mobile Menu */}
-      <AnimatePresence>
-        {isMenuOpen && (
-          <motion.div 
-            className="mobile-menu"
-            initial={{ opacity: 0, height: 0 }}
-            animate={{ opacity: 1, height: 'auto' }}
-            exit={{ opacity: 0, height: 0 }}
-            transition={{ duration: 0.3 }}
-          >
-            <Link to="/" onClick={() => setIsMenuOpen(false)}>Home</Link>
-            <Link to="/products" onClick={() => setIsMenuOpen(false)}>Products</Link>
-            <Link to="/orders" onClick={() => setIsMenuOpen(false)}>Orders</Link>
-            <Link to="/contact" onClick={() => setIsMenuOpen(false)}>Contact</Link>
-            <Link to="/bulk" onClick={() => setIsMenuOpen(false)}>
-              <Package /> Bulk Orders
-            </Link>
-            
-            {/* Mobile Language Switcher */}
-            <div className="mobile-language">
-              <h4>Language</h4>
-              {languages.map((language) => (
+        {/* Language Selector */}
+        <div className="language-selector">
+          <Globe className="globe-icon" />
+          <div className="language-dropdown">
+            <button className="current-language">
+              {currentLanguage}
+              <span className="dropdown-arrow">▼</span>
+            </button>
+            <div className="language-options">
+              {languages.map((lang) => (
                 <button
-                  key={language.code}
-                  className={`mobile-language-option ${i18n.language === language.code ? 'active' : ''}`}
-                  onClick={() => {
-                    changeLanguage(language.code);
-                    setIsMenuOpen(false);
-                  }}
+                  key={lang.code}
+                  className={`language-option ${currentLanguage === lang.code ? 'active' : ''}`}
+                  onClick={() => handleLanguageChange(lang.code)}
                 >
-                  <span className="flag">{language.flag}</span>
-                  <span className="name">{language.name}</span>
+                  {lang.code}
                 </button>
               ))}
             </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
-    </nav>
+          </div>
+        </div>
+
+        {/* Mobile Menu Toggle */}
+        <button className="mobile-menu-toggle" onClick={toggleMenu}>
+          {isMenuOpen ? <X /> : <Menu />}
+        </button>
+      </nav>
+    </header>
   );
 };
 
