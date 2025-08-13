@@ -1,17 +1,31 @@
-import React from 'react';
-import { Link } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { 
-  Globe, Linkedin, Instagram, Mail, Phone, MapPin, ArrowUp, 
+  Linkedin, Instagram, Mail, Phone, MapPin, ArrowUp, 
   MessageSquare, Package, Leaf 
 } from 'lucide-react';
-import { useTranslation } from 'react-i18next';
 
 const Footer = () => {
-  const { t } = useTranslation();
+  const navigate = useNavigate();
+  const [isScrolled, setIsScrolled] = useState(false);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      setIsScrolled(window.scrollY > 300);
+    };
+
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
 
   const scrollToTop = () => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  const handleNavigation = (path) => {
+    navigate(path);
+    scrollToTop();
   };
 
   return (
@@ -51,11 +65,11 @@ const Footer = () => {
             viewport={{ once: true }}
           >
             <h4>Quick Links</h4>
-            <Link to="/">Home</Link>
-            <Link to="/products">Products</Link>
-            <Link to="/orders">Orders</Link>
-            <Link to="/contact">Contact</Link>
-            <Link to="/bulk">Bulk Orders</Link>
+            <button onClick={() => handleNavigation('/')} className="footer-link-btn">Home</button>
+            <button onClick={() => handleNavigation('/products')} className="footer-link-btn">Products</button>
+            <button onClick={() => handleNavigation('/orders')} className="footer-link-btn">Orders</button>
+            <button onClick={() => handleNavigation('/contact')} className="footer-link-btn">Contact</button>
+            <button onClick={() => handleNavigation('/bulk')} className="footer-link-btn">Bulk Orders</button>
           </motion.div>
 
           <motion.div 
@@ -109,29 +123,30 @@ const Footer = () => {
           transition={{ duration: 0.6, delay: 0.4 }}
           viewport={{ once: true }}
         >
-          <div className="footer-bottom-content">
-            <p>&copy; 2024 AgroConnect World. All rights reserved.</p>
-            <div className="footer-bottom-links">
-              <a href="/privacy">Privacy Policy</a>
-              <a href="/terms">Terms of Service</a>
-              <a href="/cookies">Cookie Policy</a>
-            </div>
+          <p>&copy; 2024 AgroConnect World. All rights reserved.</p>
+          <div className="footer-links">
+            <Link to="/privacy-policy">Privacy Policy</Link>
+            <Link to="/terms">Terms of Service</Link>
+            <Link to="/cookies">Cookie Policy</Link>
           </div>
         </motion.div>
       </div>
 
       {/* Scroll to Top Button */}
-      <motion.button 
-        className="scroll-to-top"
-        onClick={scrollToTop}
-        whileHover={{ scale: 1.1 }}
-        whileTap={{ scale: 0.9 }}
-        initial={{ opacity: 0, scale: 0 }}
-        animate={{ opacity: 1, scale: 1 }}
-        transition={{ delay: 1 }}
-      >
-        <ArrowUp />
-      </motion.button>
+      {isScrolled && (
+        <motion.button 
+          className="scroll-to-top"
+          onClick={scrollToTop}
+          whileHover={{ scale: 1.1 }}
+          whileTap={{ scale: 0.9 }}
+          initial={{ opacity: 0, scale: 0 }}
+          animate={{ opacity: 1, scale: 1 }}
+          exit={{ opacity: 0, scale: 0 }}
+          transition={{ duration: 0.3 }}
+        >
+          <ArrowUp />
+        </motion.button>
+      )}
     </footer>
   );
 };

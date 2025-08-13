@@ -1,344 +1,353 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { 
-  ShoppingCart, Search, Download, 
-  Eye, Edit, Trash2, Plus, Package, 
-  Clock, CheckCircle, XCircle, AlertCircle 
+  ShoppingCart, Package, Leaf, Star, CheckCircle, Award
 } from 'lucide-react';
-import { useTranslation } from 'react-i18next';
-import axios from 'axios';
 import analyticsService from '../services/analyticsService';
 
-const Orders = () => {
-  const { i18n } = useTranslation();
-  const [orders, setOrders] = useState([]);
-  const [filteredOrders, setFilteredOrders] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [searchQuery, setSearchQuery] = useState('');
-  const [selectedStatus, setSelectedStatus] = useState('all');
-  const [sortBy, setSortBy] = useState('date');
+// Product data
+const products = {
+  white: [
+    {
+      id: 'white-100',
+      name: 'White Sesame Seeds - Small Pack',
+      size: '100g',
+      price: 2.99,
+      description: 'Perfect for home cooking and small recipes. Premium quality white sesame seeds.',
+      features: ['100% Natural', 'Lab-Tested', 'Non-GMO'],
+      image: 'https://images.unsplash.com/photo-1581578731548-c64695cc6952?w=400&h=400&fit=crop&crop=center',
+      badge: { icon: Leaf, text: 'Organic' }
+    },
+    {
+      id: 'white-250',
+      name: 'White Sesame Seeds - Medium Pack',
+      size: '250g',
+      price: 6.99,
+      description: 'Ideal for regular cooking needs. Premium quality white sesame seeds.',
+      features: ['100% Natural', 'Lab-Tested', 'Non-GMO'],
+      image: 'https://images.unsplash.com/photo-1581578731548-c64695cc6952?w=400&h=400&fit=crop&crop=center',
+      badge: { icon: Leaf, text: 'Organic' }
+    },
+    {
+      id: 'white-500',
+      name: 'White Sesame Seeds - Large Pack',
+      size: '500g',
+      price: 12.99,
+      description: 'Great value for bulk cooking. Premium quality white sesame seeds.',
+      features: ['100% Natural', 'Lab-Tested', 'Non-GMO'],
+      image: 'https://images.unsplash.com/photo-1581578731548-c64695cc6952?w=400&h=400&fit=crop&crop=center',
+      badge: { icon: Award, text: 'Best Value' }
+    }
+  ],
+  black: [
+    {
+      id: 'black-100',
+      name: 'Black Sesame Seeds - Small Pack',
+      size: '100g',
+      price: 2.49,
+      description: 'Perfect for garnishing and small recipes. Premium black sesame seeds.',
+      features: ['Antioxidant-Rich', 'Iron & Calcium', 'Vegan'],
+      image: 'https://images.unsplash.com/photo-1574323347407-f5e1ad6d020b?w=400&h=400&fit=crop&crop=center',
+      badge: { icon: Star, text: 'Premium' }
+    },
+    {
+      id: 'black-250',
+      name: 'Black Sesame Seeds - Medium Pack',
+      size: '250g',
+      price: 5.99,
+      description: 'Ideal for regular cooking needs. Premium black sesame seeds.',
+      features: ['Antioxidant-Rich', 'Iron & Calcium', 'Vegan'],
+      image: 'https://images.unsplash.com/photo-1574323347407-f5e1ad6d020b?w=400&h=400&fit=crop&crop=center',
+      badge: { icon: Star, text: 'Premium' }
+    },
+    {
+      id: 'black-500',
+      name: 'Black Sesame Seeds - Large Pack',
+      size: '500g',
+      price: 10.99,
+      description: 'Great value for bulk cooking. Premium black sesame seeds.',
+      features: ['Antioxidant-Rich', 'Iron & Calcium', 'Vegan'],
+      image: 'https://images.unsplash.com/photo-1574323347407-f5e1ad6d020b?w=400&h=400&fit=crop&crop=center',
+      badge: { icon: Award, text: 'Best Value' }
+    }
+  ]
+};
 
-  const statuses = [
-    'all', 'pending', 'confirmed', 'processing', 'shipped', 'delivered', 'cancelled'
-  ];
+const Orders = () => {
+  // Order section state
+  const [quantities, setQuantities] = useState({});
+  const [selectedProducts, setSelectedProducts] = useState([]);
 
   useEffect(() => {
     analyticsService.trackPageVisit(window.location.href, document.title, 'orders');
-    fetchOrders();
+    
+    // Initialize quantities for all products
+    const initialQuantities = {};
+    [...products.white, ...products.black].forEach(product => {
+      initialQuantities[product.id] = 1;
+    });
+    setQuantities(initialQuantities);
   }, []);
 
-  useEffect(() => {
-    filterAndSortOrders();
-  }, [orders, searchQuery, selectedStatus, sortBy]);
-
-  const fetchOrders = async () => {
-    try {
-      setLoading(true);
-      const response = await axios.get(`${process.env.REACT_APP_API_URL || 'http://localhost:8080'}/api/orders/`);
-      setOrders(response.data);
-      analyticsService.trackEvent('orders_loaded', { count: response.data.length });
-    } catch (error) {
-      console.error('Error fetching orders:', error);
-      // Fallback to sample data
-      setOrders(getSampleOrders());
-    } finally {
-      setLoading(false);
-    }
+  // Order section functions
+  const updateQuantity = (productId, change) => {
+    setQuantities(prev => ({
+      ...prev,
+      [productId]: Math.max(1, prev[productId] + change)
+    }));
   };
 
-  const getSampleOrders = () => [
-    {
-      id: '1',
-      customerName: 'John Doe',
-      customerEmail: 'john.doe@example.com',
-      companyName: 'Green Farms Ltd',
-      totalAmount: 2500.00,
-      currency: 'USD',
-      status: 'confirmed',
-      orderDate: '2024-08-02T10:30:00Z',
-      expectedDeliveryDate: '2024-08-15T00:00:00Z',
-      items: [
-        { productName: 'Black Sesame Seeds', quantity: 100, unitPrice: 3.50 }
-      ]
-    },
-    {
-      id: '2',
-      customerName: 'Sarah Johnson',
-      customerEmail: 'sarah.johnson@example.com',
-      companyName: 'Organic Valley Co',
-      totalAmount: 1800.00,
-      currency: 'USD',
-      status: 'processing',
-      orderDate: '2024-08-01T14:20:00Z',
-      expectedDeliveryDate: '2024-08-12T00:00:00Z',
-      items: [
-        { productName: 'White Sesame Seeds', quantity: 50, unitPrice: 2.80 }
-      ]
-    },
-    {
-      id: '3',
-      customerName: 'Raj Patel',
-      customerEmail: 'raj.patel@example.com',
-      companyName: 'Patel Farms',
-      totalAmount: 3200.00,
-      currency: 'USD',
-      status: 'shipped',
-      orderDate: '2024-07-30T09:15:00Z',
-      expectedDeliveryDate: '2024-08-10T00:00:00Z',
-      items: [
-        { productName: 'Premium Organic Sesame Mix', quantity: 200, unitPrice: 4.20 },
-        { productName: 'Black Sesame Seeds', quantity: 150, unitPrice: 3.50 }
-      ]
-    }
-  ];
-
-  const filterAndSortOrders = () => {
-    let filtered = orders.filter(order => {
-      const matchesSearch = order.customerName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                           order.customerEmail.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                           order.companyName.toLowerCase().includes(searchQuery.toLowerCase());
-      const matchesStatus = selectedStatus === 'all' || order.status === selectedStatus;
-      
-      return matchesSearch && matchesStatus;
-    });
-
-    // Sort orders
-    filtered.sort((a, b) => {
-      switch (sortBy) {
-        case 'date':
-          return new Date(b.orderDate) - new Date(a.orderDate);
-        case 'amount':
-          return b.totalAmount - a.totalAmount;
-        case 'customer':
-          return a.customerName.localeCompare(b.customerName);
-        default:
-          return 0;
-      }
-    });
-
-    setFilteredOrders(filtered);
+  const handleAddToCart = (product, quantity) => {
+    analyticsService.trackButtonClick('add-to-cart', 'order-section');
+    
+    alert(`${quantity}x ${product.name} (${product.size}) added to cart!`);
   };
-
-  const getStatusIcon = (status) => {
-    switch (status) {
-      case 'pending':
-        return <Clock className="status-icon pending" />;
-      case 'confirmed':
-        return <CheckCircle className="status-icon confirmed" />;
-      case 'processing':
-        return <Package className="status-icon processing" />;
-      case 'shipped':
-        return <Package className="status-icon shipped" />;
-      case 'delivered':
-        return <CheckCircle className="status-icon delivered" />;
-      case 'cancelled':
-        return <XCircle className="status-icon cancelled" />;
-      default:
-        return <AlertCircle className="status-icon" />;
-    }
-  };
-
-  const getStatusColor = (status) => {
-    switch (status) {
-      case 'pending': return 'pending';
-      case 'confirmed': return 'confirmed';
-      case 'processing': return 'processing';
-      case 'shipped': return 'shipped';
-      case 'delivered': return 'delivered';
-      case 'cancelled': return 'cancelled';
-      default: return '';
-    }
-  };
-
-  const handleOrderClick = (order) => {
-    analyticsService.trackEvent('order_viewed', {
-      orderId: order.id,
-      customerName: order.customerName,
-      status: order.status
-    });
-  };
-
-  const exportOrders = () => {
-    analyticsService.trackEvent('orders_exported', {
-      orderCount: filteredOrders.length
-    });
-    // TODO: Implement CSV/PDF export
-    alert('Orders export feature coming soon!');
-  };
-
-  if (loading) {
-    return (
-      <div className="orders-loading">
-        <div className="loading-spinner"></div>
-        <p>Loading orders...</p>
-      </div>
-    );
-  }
 
   return (
     <div className="orders-page">
-      <div className="container">
-        {/* Header */}
-        <motion.div 
-          className="page-header"
-          initial={{ opacity: 0, y: 30 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6 }}
-        >
-          <h1>Order Management</h1>
-          <p>Track and manage all B2B orders and inquiries</p>
-        </motion.div>
-
-        {/* Filters and Search */}
-        <motion.div 
-          className="filters-section"
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, delay: 0.1 }}
-        >
-          <div className="search-bar">
-            <Search className="search-icon" />
-            <input
-              type="text"
-              placeholder="Search orders by customer, email, or company..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-            />
-          </div>
-
-          <div className="filters">
-            <div className="filter-group">
-              <label>Status:</label>
-              <select 
-                value={selectedStatus} 
-                onChange={(e) => setSelectedStatus(e.target.value)}
+      {/* Hero Section */}
+      <section className="order-hero">
+        <div className="container">
+          <motion.div 
+            className="hero-content"
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8 }}
+          >
+            <h1>Premium Sesame Seeds Collection</h1>
+            <p className="hero-subtitle">
+              Discover our premium selection of organic sesame seeds, sourced from the finest farms 
+              and processed to perfection. Perfect for both home cooking and commercial use.
+            </p>
+            <div className="hero-features">
+              <motion.div 
+                className="feature"
+                whileHover={{ scale: 1.05 }}
+                transition={{ type: "spring", stiffness: 300 }}
               >
-                {statuses.map(status => (
-                  <option key={status} value={status}>
-                    {status.charAt(0).toUpperCase() + status.slice(1)}
-                  </option>
-                ))}
-              </select>
+                <Package className="feature-icon" />
+                <div className="feature-text">
+                  <span className="feature-title">Premium Quality</span>
+                  <span className="feature-desc">100% Pure & Natural</span>
+                </div>
+              </motion.div>
+              <motion.div 
+                className="feature"
+                whileHover={{ scale: 1.05 }}
+                transition={{ type: "spring", stiffness: 300 }}
+              >
+                <CheckCircle className="feature-icon" />
+                <div className="feature-text">
+                  <span className="feature-title">Lab Tested</span>
+                  <span className="feature-desc">Quality Guaranteed</span>
+                </div>
+              </motion.div>
+              <motion.div 
+                className="feature"
+                whileHover={{ scale: 1.05 }}
+                transition={{ type: "spring", stiffness: 300 }}
+              >
+                <Leaf className="feature-icon" />
+                <div className="feature-text">
+                  <span className="feature-title">100% Organic</span>
+                  <span className="feature-desc">Certified Products</span>
+                </div>
+              </motion.div>
             </div>
-
-            <div className="filter-group">
-              <label>Sort by:</label>
-              <select value={sortBy} onChange={(e) => setSortBy(e.target.value)}>
-                <option value="date">Date</option>
-                <option value="amount">Amount</option>
-                <option value="customer">Customer</option>
-              </select>
-            </div>
-
-            <button className="btn btn-secondary" onClick={exportOrders}>
-              <Download /> Export Orders
-            </button>
-
-            <button className="btn btn-primary">
-              <Plus /> New Order
-            </button>
-          </div>
-        </motion.div>
-
-        {/* Orders Table */}
-        <motion.div 
-          className="orders-table-container"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ duration: 0.6, delay: 0.2 }}
-        >
-          {filteredOrders.length === 0 ? (
-            <div className="no-orders">
-              <ShoppingCart />
-              <h3>No orders found</h3>
-              <p>Try adjusting your search criteria or filters</p>
-            </div>
-          ) : (
-            <div className="orders-table">
-              <div className="table-header">
-                <div className="header-cell">Order ID</div>
-                <div className="header-cell">Customer</div>
-                <div className="header-cell">Company</div>
-                <div className="header-cell">Amount</div>
-                <div className="header-cell">Status</div>
-                <div className="header-cell">Order Date</div>
-                <div className="header-cell">Expected Delivery</div>
-                <div className="header-cell">Actions</div>
+            <div className="hero-banner">
+              <div className="shipping-info">
+                <ShoppingCart className="banner-icon" />
+                <span>Free Shipping on Orders Over $50</span>
               </div>
+            </div>
+          </motion.div>
+        </div>
+      </section>
 
-              {filteredOrders.map((order, index) => (
-                <motion.div
-                  key={order.id}
-                  className="table-row"
-                  initial={{ opacity: 0, y: 20 }}
+      {/* Order Section */}
+      <section className="order-section">
+        <div className="container">
+          <div className="product-category">
+            <h2>White Sesame Seeds</h2>
+            <div className="order-products-grid">
+              {products.white.map((product, index) => (
+                <motion.div 
+                  key={product.id}
+                  className="order-product-card"
+                  initial={{ opacity: 0, y: 50 }}
                   animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.6, delay: 0.3 + index * 0.05 }}
-                  whileHover={{ backgroundColor: '#f8f9fa' }}
+                  transition={{ duration: 0.6, delay: 0.2 * index }}
                 >
-                  <div className="table-cell">#{order.id}</div>
-                  <div className="table-cell">
-                    <div className="customer-info">
-                      <div className="customer-name">{order.customerName}</div>
-                      <div className="customer-email">{order.customerEmail}</div>
+                  <div className="product-image-container">
+                    <img 
+                      src={product.image}
+                      alt={product.name}
+                      className="product-package-image"
+                    />
+                    <div className={`product-badge ${product.badge.text.toLowerCase()}`}>
+                      <product.badge.icon />
+                      <span>{product.badge.text}</span>
                     </div>
                   </div>
-                  <div className="table-cell">{order.companyName}</div>
-                  <div className="table-cell">
-                    <div className="amount">
-                      {order.currency} {order.totalAmount.toLocaleString()}
+
+                  <div className="product-details">
+                    <h3>{product.name}</h3>
+                    <p className="product-description">{product.description}</p>
+                    
+                    <div className="product-features">
+                      {product.features.map(feature => (
+                        <span key={feature} className="feature">{feature}</span>
+                      ))}
                     </div>
-                  </div>
-                  <div className="table-cell">
-                    <div className={`status-badge ${getStatusColor(order.status)}`}>
-                      {getStatusIcon(order.status)}
-                      <span>{order.status}</span>
+
+                    <div className="price-display">
+                      <span className="price">${product.price.toFixed(2)}</span>
+                      <span className="size">per {product.size}</span>
                     </div>
-                  </div>
-                  <div className="table-cell">
-                    {new Date(order.orderDate).toLocaleDateString()}
-                  </div>
-                  <div className="table-cell">
-                    {new Date(order.expectedDeliveryDate).toLocaleDateString()}
-                  </div>
-                  <div className="table-cell">
-                    <div className="actions">
-                      <button 
-                        className="action-btn view-btn"
-                        onClick={() => handleOrderClick(order)}
-                        title="View Order"
-                      >
-                        <Eye />
-                      </button>
-                      <button 
-                        className="action-btn edit-btn"
-                        title="Edit Order"
-                      >
-                        <Edit />
-                      </button>
-                      <button 
-                        className="action-btn delete-btn"
-                        title="Delete Order"
-                      >
-                        <Trash2 />
-                      </button>
+
+                    <div className="quantity-selector">
+                      <label>Quantity:</label>
+                      <div className="quantity-controls">
+                        <button 
+                          className="qty-btn" 
+                          onClick={() => updateQuantity(product.id, -1)}
+                        >
+                          -
+                        </button>
+                        <input 
+                          type="number" 
+                          value={quantities[product.id] || 1} 
+                          onChange={(e) => updateQuantity(
+                            product.id, 
+                            parseInt(e.target.value) || 1
+                          )}
+                          min="1"
+                          className="qty-input"
+                        />
+                        <button 
+                          className="qty-btn" 
+                          onClick={() => updateQuantity(product.id, 1)}
+                        >
+                          +
+                        </button>
+                      </div>
                     </div>
+
+                    <div className="price-display">
+                      <span className="total-price">
+                        Total: ${((quantities[product.id] || 1) * product.price).toFixed(2)}
+                      </span>
+                      {(quantities[product.id] || 1) * product.price >= 50 && (
+                        <span className="free-shipping">🚚 Free Shipping!</span>
+                      )}
+                    </div>
+
+                    <motion.button 
+                      className="add-to-cart-btn"
+                      onClick={() => handleAddToCart(product, quantities[product.id] || 1)}
+                      whileHover={{ scale: 1.05 }}
+                      whileTap={{ scale: 0.95 }}
+                    >
+                      <ShoppingCart />
+                      Add to Cart
+                    </motion.button>
                   </div>
                 </motion.div>
               ))}
             </div>
-          )}
-        </motion.div>
+          </div>
 
-        {/* Results Summary */}
-        <motion.div 
-          className="results-summary"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ duration: 0.6, delay: 0.3 }}
-        >
-          <p>Showing {filteredOrders.length} of {orders.length} orders</p>
-        </motion.div>
-      </div>
+          <div className="product-category">
+            <h2>Black Sesame Seeds</h2>
+            <div className="order-products-grid">
+              {products.black.map((product, index) => (
+                <motion.div 
+                  key={product.id}
+                  className="order-product-card"
+                  initial={{ opacity: 0, y: 50 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.6, delay: 0.2 * (index + 3) }}
+                >
+                  <div className="product-image-container">
+                    <img 
+                      src={product.image}
+                      alt={product.name}
+                      className="product-package-image"
+                    />
+                    <div className={`product-badge ${product.badge.text.toLowerCase()}`}>
+                      <product.badge.icon />
+                      <span>{product.badge.text}</span>
+                    </div>
+                  </div>
+
+                  <div className="product-details">
+                    <h3>{product.name}</h3>
+                    <p className="product-description">{product.description}</p>
+                    
+                    <div className="product-features">
+                      {product.features.map(feature => (
+                        <span key={feature} className="feature">{feature}</span>
+                      ))}
+                    </div>
+
+                    <div className="price-display">
+                      <span className="price">${product.price.toFixed(2)}</span>
+                      <span className="size">per {product.size}</span>
+                    </div>
+
+                    <div className="quantity-selector">
+                      <label>Quantity:</label>
+                      <div className="quantity-controls">
+                        <button 
+                          className="qty-btn" 
+                          onClick={() => updateQuantity(product.id, -1)}
+                        >
+                          -
+                        </button>
+                        <input 
+                          type="number" 
+                          value={quantities[product.id] || 1} 
+                          onChange={(e) => updateQuantity(
+                            product.id, 
+                            parseInt(e.target.value) || 1
+                          )}
+                          min="1"
+                          className="qty-input"
+                        />
+                        <button 
+                          className="qty-btn" 
+                          onClick={() => updateQuantity(product.id, 1)}
+                        >
+                          +
+                        </button>
+                      </div>
+                    </div>
+
+                    <div className="price-display">
+                      <span className="total-price">
+                        Total: ${((quantities[product.id] || 1) * product.price).toFixed(2)}
+                      </span>
+                      {(quantities[product.id] || 1) * product.price >= 50 && (
+                        <span className="free-shipping">🚚 Free Shipping!</span>
+                      )}
+                    </div>
+
+                    <motion.button 
+                      className="add-to-cart-btn"
+                      onClick={() => handleAddToCart(product, quantities[product.id] || 1)}
+                      whileHover={{ scale: 1.05 }}
+                      whileTap={{ scale: 0.95 }}
+                    >
+                      <ShoppingCart />
+                      Add to Cart
+                    </motion.button>
+                  </div>
+                </motion.div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </section>
     </div>
   );
 };

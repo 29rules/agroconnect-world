@@ -88,7 +88,7 @@ print_success "SSH Configuration loaded: $SSH_USER@$SSH_HOST:$REMOTE_PATH"
 
 # 2. Build React application
 print_status "📦 Installing dependencies..."
-if ! npm install; then
+if ! cd client && npm install; then
     print_error "npm install failed!"
     exit 1
 fi
@@ -106,6 +106,9 @@ if [[ ! -d "build" ]]; then
 fi
 
 print_success "React application built successfully!"
+
+# Go back to root directory for deployment
+cd ..
 
 # 3. Connect to Hostgator server and backup existing contents
 print_status "💾 Creating backup of existing site..."
@@ -131,7 +134,7 @@ fi
 
 # 5. Upload build folder contents using rsync
 print_status "📤 Uploading build files via rsync..."
-if rsync -avz --delete -e "ssh -p $SSH_PORT" build/ "$SSH_USER@$SSH_HOST:$REMOTE_PATH/"; then
+if rsync -avz --delete -e "ssh -p $SSH_PORT" client/build/ "$SSH_USER@$SSH_HOST:$REMOTE_PATH/"; then
     print_success "Build files uploaded successfully!"
 else
     print_error "rsync upload failed!"
